@@ -23,6 +23,14 @@
  
 var form = document.getElementById('config');
 
+
+// Only the CARTO basemaps are available for now
+var availableBasemaps = [
+    'voyager',
+    'positron', 
+    'dark-matter'
+];
+
 //
 // Interactive map
 //
@@ -46,27 +54,34 @@ function initMap() {
     try {
 
         deck.carto.setDefaultCredentials({
-            apiBaseUrl: document.getElementById('regionSelect').value});
-
+            apiBaseUrl: document.getElementById('regionSelect').value
+        });
 
         deck.carto.fetchMap({cartoMapId: document.getElementById('mapIdInput').value})
         .then(({initialViewState, mapStyle, layers}) => {
     
             deckLayers = layers;
     
+            // If the map uses a non-supported basemap, 
+            // we switch to a default (CARTO Voyager)
+            var basemap = mapStyle.styleType;
+            if (!availableBasemaps.includes(basemap)) {
+                basemap = availableBasemaps[0];
+            }
+
             map = new maplibregl.Map({
                 container: 'map',
                 center: [initialViewState.longitude, initialViewState.latitude],
                 zoom: initialViewState.zoom,
                 pitch: initialViewState.pitch,
                 bearing: initialViewState.bearing,
-                style: `https://basemaps.cartocdn.com/gl/${mapStyle.styleType}-gl-style/style.json`
+                style: `https://basemaps.cartocdn.com/gl/${basemap}-gl-style/style.json`
             });
             map.addControl(new maplibregl.NavigationControl());
             map.on('moveend', updateLocationInputs).on('zoomend', updateLocationInputs);
             updateLocationInputs();
         
-            form.styleSelect.value = mapStyle.styleType;
+            form.styleSelect.value = basemap;
     
             // Add the deck.gl layers as an overlay
             deckOverlay = new deck.MapboxOverlay({
@@ -74,13 +89,20 @@ function initMap() {
                 layers
             });
             map.addControl(deckOverlay);
-        });
+        })
+        .catch((e) => {
+            if (e.error === "Map not found") {
+                openErrorModal('The map was not found. Please check the ID and Region.');    
+            }
+            else {
+                openErrorModal('Error loading the map: ' + e.error);    
+            }
+        });        
     } catch (e) {
         var mapContainer = document.getElementById('map');
         mapContainer.parentNode.removeChild(mapContainer);
         document.getElementById('config-fields').setAttribute('disabled', 'yes');
-        openErrorModal('This site requires WebGL, but your browser doesn\'t seem' +
-            ' to support it: ' + e.message);
+        openErrorModal('Error initializing the map: ' + e.message);
     }
     
 }
