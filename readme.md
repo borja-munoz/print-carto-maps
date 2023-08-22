@@ -23,6 +23,11 @@ high resolution maps for printing by leveraging
 4. Choose the desired options
 5. Click on the "Generate Map" button
 
+## Limitations
+
+- The application only works with maps shared publicly
+- The application does not support Google Maps basemap. If the map uses one of those, it will switch to a default CARTO basemap.
+
 ## Building
 
 Run a local webserver such as `python3 -m http.server`, and open `index.html`.
