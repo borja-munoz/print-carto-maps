@@ -49,15 +49,17 @@ function updateLocationInputs() {
 
 var map;
 var deckLayers;
+var deckOverlay;
 
 function initMap() {
     try {
 
-        deck.carto.setDefaultCredentials({
-            apiBaseUrl: document.getElementById('regionSelect').value
-        });
+        let apiBaseUrl = document.getElementById('regionSelect').value;
 
-        deck.carto.fetchMap({cartoMapId: document.getElementById('mapIdInput').value})
+        deck.carto.fetchMap({
+            apiBaseUrl,
+            cartoMapId: document.getElementById('mapIdInput').value
+        })
         .then(({initialViewState, mapStyle, layers}) => {
     
             deckLayers = layers;
@@ -84,8 +86,12 @@ function initMap() {
             form.styleSelect.value = basemap;
     
             // Add the deck.gl layers as an overlay
+            if (deckOverlay) {
+                map.removeControl(deckOverlay);
+            }
             deckOverlay = new deck.MapboxOverlay({
-                interleaved: true,
+                // interleaved: true,
+                interleaved: false,
                 layers
             });
             map.addControl(deckOverlay);
@@ -438,7 +444,8 @@ function createPrintMap(width, height, dpi, format, unit, zoom, center,
         attributionControl: false
     });
     renderMap.addControl(new deck.MapboxOverlay({
-        interleaved: true,
+        // interleaved: true,
+        interleaved: false,
         // Clone the layers with a random ID to avoid issues
         // when adding the layers to the hidden div
         layers: deckLayers.map(l => l.clone({
