@@ -90,8 +90,7 @@ function initMap() {
                 map.removeControl(deckOverlay);
             }
             deckOverlay = new deck.MapboxOverlay({
-                // interleaved: true,
-                interleaved: false,
+                interleaved: true,
                 layers
             });
             map.addControl(deckOverlay);
@@ -444,8 +443,7 @@ function createPrintMap(width, height, dpi, format, unit, zoom, center,
         attributionControl: false
     });
     renderMap.addControl(new deck.MapboxOverlay({
-        // interleaved: true,
-        interleaved: false,
+        interleaved: true,
         // Clone the layers with a random ID to avoid issues
         // when adding the layers to the hidden div
         layers: deckLayers.map(l => l.clone({
